@@ -1,0 +1,144 @@
+name: Build Plugin (MO2 2.5.2 Compat)
+
+on:
+  push:
+    branches: [ "mo2-2.5.2-compat" ]
+  pull_request:
+    branches: [ "mo2-2.5.2-compat" ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: RelWithDebInfo
+  SOURCE_ROOT: ${{ github.workspace }}
+  VCPKG_ROOT: C:\vcpkg
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+permissions:
+  contents: write
+
+jobs:
+  build-compat:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout Plugin
+        uses: actions/checkout@v4
+        with:
+          path: build/mo2-fomod-plus
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.*'
+          cache: true
+
+      - name: Clone Mod Organizer Builder (mob)
+        run: git clone --branch v2.5.2 --depth 1 https://github.com/ModOrganizer2/mob.git mob
+        working-directory: ${{github.workspace}}/build/mo2-fomod-plus
+
+      - name: Pre-clone MO2 v2.5.2-era repos
+        run: |
+          mkdir -p mob_prefix/build/modorganizer_super
+          git clone https://github.com/ModOrganizer2/cmake_common.git mob_prefix/build/modorganizer_super/cmake_common
+          cd mob_prefix/build/modorganizer_super/cmake_common
+          git checkout 8abcb29e0810e07f9a464458264b904e9017e633
+          cd ../../../..
+          git clone https://github.com/ModOrganizer2/modorganizer-uibase.git mob_prefix/build/modorganizer_super/uibase
+          cd mob_prefix/build/modorganizer_super/uibase
+          git checkout e402d43eaf46937644ba9782a25a5ee5538e4a2e
+          cd ../../../..
+          git clone https://github.com/ModOrganizer2/modorganizer-archive.git mob_prefix/build/modorganizer_super/archive
+          cd mob_prefix/build/modorganizer_super/archive
+          git checkout a13e224c17fb0f2210305cb3dcc442f25f2fd58c
+        working-directory: ${{github.workspace}}/build/mo2-fomod-plus
+
+      - name: Fetch and Build MO2 2.5.2 Dependencies via Native mob
+        run: |
+          ./bootstrap.ps1
+          ./mob.exe -d ${{github.workspace}}/build/mo2-fomod-plus/mob_prefix -i ${{github.workspace}}/build/mo2-fomod-plus/mob.ini.2.5.2 build
+        working-directory: ${{github.workspace}}/build/mo2-fomod-plus/mob
+
+      - name: Build uibase (v2.5.2-era)
+        run: |
+          $MOB_PREFIX = "${{github.workspace}}/build/mo2-fomod-plus/mob_prefix"
+          $SRC = "$MOB_PREFIX/build/modorganizer_super/uibase"
+          $BUILD = "$SRC/vsbuild"
+          mkdir $BUILD
+          cmake -S $SRC -B $BUILD -G "Visual Studio 17 2022" -A x64 `
+            "-DCMAKE_BUILD_TYPE=RelWithDebInfo" `
+            "-DCMAKE_INSTALL_MESSAGE=NEVER" `
+            "-DCMAKE_INSTALL_PREFIX:PATH=$MOB_PREFIX/install" `
+            "-DDEPENDENCIES_DIR=$MOB_PREFIX/build" `
+            "-DBOOST_ROOT=$MOB_PREFIX/build/boost_1_85_0" `
+            "-DBOOST_LIBRARYDIR=$MOB_PREFIX/build/boost_1_85_0/lib64-msvc-14.3/lib" `
+            "-DSPDLOG_ROOT=$MOB_PREFIX/build/spdlog-v1.14.1" `
+            "-DLOOT_PATH=$MOB_PREFIX/build/libloot-0.23.0-win64" `
+            "-DLZ4_ROOT=$MOB_PREFIX/build/lz4-v1.9.4" `
+            "-DQT_ROOT=${{ env.QT_ROOT_DIR }}" `
+            "-DZLIB_ROOT=$MOB_PREFIX/build/zlib-v1.3.1" `
+            "-DPYTHON_ROOT=$MOB_PREFIX/build/python-3.12.3" `
+            "-DSEVENZ_ROOT=$MOB_PREFIX/build/7zip-24.05" `
+            "-DLIBBSARCH_ROOT=$MOB_PREFIX/build/libbsarch-0.0.12-release-x64" `
+            "-DBOOST_DI_ROOT=$MOB_PREFIX/build/di" `
+            "-DGTEST_ROOT=$MOB_PREFIX/build/googletest/build/x64/Release" `
+            "-DOPENSSL_ROOT_DIR=$MOB_PREFIX/build/openssl-3.3.0" `
+            "-DDIRECTXTEX_ROOT=$MOB_PREFIX/build/DirectXTex"
+          cmake --build $BUILD --config RelWithDebInfo
+          cmake --install $BUILD --config RelWithDebInfo
+
+      - name: Build archive (v2.5.2-era)
+        run: |
+          $MOB_PREFIX = "${{github.workspace}}/build/mo2-fomod-plus/mob_prefix"
+          $SRC = "$MOB_PREFIX/build/modorganizer_super/archive"
+          $BUILD = "$SRC/vsbuild"
+          mkdir $BUILD
+          cmake -S $SRC -B $BUILD -G "Visual Studio 17 2022" -A x64 `
+            "-DCMAKE_BUILD_TYPE=RelWithDebInfo" `
+            "-DCMAKE_INSTALL_MESSAGE=NEVER" `
+            "-DCMAKE_INSTALL_PREFIX:PATH=$MOB_PREFIX/install" `
+            "-DDEPENDENCIES_DIR=$MOB_PREFIX/build" `
+            "-DBOOST_ROOT=$MOB_PREFIX/build/boost_1_85_0" `
+            "-DBOOST_LIBRARYDIR=$MOB_PREFIX/build/boost_1_85_0/lib64-msvc-14.3/lib" `
+            "-DSPDLOG_ROOT=$MOB_PREFIX/build/spdlog-v1.14.1" `
+            "-DLOOT_PATH=$MOB_PREFIX/build/libloot-0.23.0-win64" `
+            "-DLZ4_ROOT=$MOB_PREFIX/build/lz4-v1.9.4" `
+            "-DQT_ROOT=${{ env.QT_ROOT_DIR }}" `
+            "-DZLIB_ROOT=$MOB_PREFIX/build/zlib-v1.3.1" `
+            "-DPYTHON_ROOT=$MOB_PREFIX/build/python-3.12.3" `
+            "-DSEVENZ_ROOT=$MOB_PREFIX/build/7zip-24.05" `
+            "-DLIBBSARCH_ROOT=$MOB_PREFIX/build/libbsarch-0.0.12-release-x64" `
+            "-DBOOST_DI_ROOT=$MOB_PREFIX/build/di" `
+            "-DGTEST_ROOT=$MOB_PREFIX/build/googletest/build/x64/Release" `
+            "-DOPENSSL_ROOT_DIR=$MOB_PREFIX/build/openssl-3.3.0" `
+            "-DDIRECTXTEX_ROOT=$MOB_PREFIX/build/DirectXTex"
+          cmake --build $BUILD --config RelWithDebInfo
+          cmake --install $BUILD --config RelWithDebInfo
+
+      - name: Configure CMake
+        run: |
+          $MOB_PREFIX = "${{github.workspace}}/build/mo2-fomod-plus/mob_prefix"
+          cmake --preset compat-v2.5.2 `
+            "-DDEPENDENCIES_DIR=$MOB_PREFIX/build/modorganizer_super" `
+            "-DBOOST_ROOT=$MOB_PREFIX/build/boost_1_85_0" `
+            "-DQT_ROOT=${{ env.QT_ROOT_DIR }}" `
+            "-DPYTHON_ROOT=$MOB_PREFIX/build/python-3.12.3" `
+            "-DCMAKE_INSTALL_PREFIX=$MOB_PREFIX/install" `
+            "-DCMAKE_PREFIX_PATH=$MOB_PREFIX/install/lib/cmake;$MOB_PREFIX/install/share;${{github.workspace}}/build/mo2-fomod-plus/vcpkg_installed/x64-windows/share;${{ env.QT_ROOT_DIR }}" `
+            "-DQt6_DIR=${{ env.QT_ROOT_DIR }}\lib\cmake\Qt6"
+        working-directory: ${{github.workspace}}/build/mo2-fomod-plus
+
+      - name: Build & Package
+        run: |
+          cmake --build build-2.5.2 --config RelWithDebInfo --target package
+        working-directory: ${{github.workspace}}/build/mo2-fomod-plus
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mo2-fomod-plus-v2.5.2-build
+          path: ${{github.workspace}}/build/mo2-fomod-plus/package
