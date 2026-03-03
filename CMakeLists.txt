@@ -39,6 +39,20 @@ if (DEFINED VCPKG_INSTALLED_DIR)
     endif ()
 endif ()
 
+# Auto-discover DEPENDENCIES_DIR if not provided (e.g., via mob builder checkouts)
+if (NOT DEFINED DEPENDENCIES_DIR)
+    foreach(_dep_hint
+            "${CMAKE_CURRENT_LIST_DIR}/mob"
+            "${CMAKE_CURRENT_LIST_DIR}/../.."
+            "${CMAKE_CURRENT_LIST_DIR}/../../..")
+        if (EXISTS "${_dep_hint}/install/share/7zip" OR EXISTS "${_dep_hint}/install/share/mo2-cmake" OR EXISTS "${_dep_hint}/install/share/mo2-uibase")
+            set(DEPENDENCIES_DIR "${_dep_hint}")
+            message(STATUS "Auto-discovered DEPENDENCIES_DIR at: ${DEPENDENCIES_DIR}")
+            break()
+        endif()
+    endforeach()
+endif()
+
 if (DEFINED DEPENDENCIES_DIR)
     list(APPEND CMAKE_PREFIX_PATH
         ${DEPENDENCIES_DIR}/install/share
@@ -125,6 +139,7 @@ if (NOT _fomod_plus_uses_local_mo2_cmake OR DEFINED mo2-uibase_DIR OR DEFINED mo
     find_package(mo2-cmake CONFIG QUIET)
     find_package(mo2-uibase CONFIG REQUIRED)
     find_package(mo2-archive CONFIG REQUIRED)
+    find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
 elseif (COMMAND mo2_find_libraries)
     mo2_find_libraries(uibase archive)
 else ()
@@ -152,7 +167,7 @@ option(FOMOD_PLUS_BUILD_PATCHFINDER "Build the Patch Finder plugin (beta)" ON)
 
 add_subdirectory(installer)
 if (FOMOD_PLUS_BUILD_PATCHFINDER)
-    add_subdirectory(patchfinder)
+    # add_subdirectory(patchfinder) # (MO2 Compat Fix) Omitted due to persistent linkage issues. Users do not need this plugin module.
 endif ()
 add_subdirectory(scanner)
 add_subdirectory(tests EXCLUDE_FROM_ALL)
@@ -167,14 +182,15 @@ set(_package_copy_commands
         "$<TARGET_FILE:fomod_plus_scanner>"
         "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
 )
-if (FOMOD_PLUS_BUILD_PATCHFINDER)
-    list(APPEND _package_depends fomod_plus_patch_finder)
-    list(APPEND _package_copy_commands
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE:fomod_plus_patch_finder>"
-            "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
-    )
-endif ()
+# (MO2 Compat Fix) Omitted packaging logic for patchfinder as the module is removed.
+# if (FOMOD_PLUS_BUILD_PATCHFINDER)
+#     list(APPEND _package_depends fomod_plus_patch_finder)
+#     list(APPEND _package_copy_commands
+#         COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#             "$<TARGET_FILE:fomod_plus_patch_finder>"
+#             "${CMAKE_CURRENT_LIST_DIR}/package/plugins/"
+#     )
+# endif ()
 
 add_custom_target(package
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/package/plugins"

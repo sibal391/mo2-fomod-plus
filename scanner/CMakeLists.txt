@@ -35,17 +35,19 @@ if (MSVC)
     )
 endif ()
 
-target_link_libraries(fomod_plus_scanner PRIVATE mo2::uibase mo2::archive pugixml nlohmann_json::nlohmann_json)
+target_link_libraries(fomod_plus_scanner PRIVATE mo2::uibase mo2::archive pugixml nlohmann_json::nlohmann_json Qt6::Core Qt6::Gui Qt6::Widgets)
 mo2_configure_plugin(fomod_plus_scanner WARNINGS OFF PRIVATE_DEPENDS archive)
 
-# Ensure PDB is generated
-target_compile_options(fomod_plus_scanner PRIVATE $<$<CONFIG:RelWithDebInfo>:/Zi>)
-target_link_options(fomod_plus_scanner PRIVATE $<$<CONFIG:RelWithDebInfo>:/DEBUG>)
+if(MSVC)
+    # Ensure PDB is generated
+    target_compile_options(fomod_plus_scanner PRIVATE $<$<CONFIG:RelWithDebInfo>:/Zi>)
+    target_link_options(fomod_plus_scanner PRIVATE $<$<CONFIG:RelWithDebInfo>:/DEBUG>)
 
-# Install PDB alongside DLL
-install(FILES $<TARGET_PDB_FILE:fomod_plus_scanner>
-        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO}
-        CONFIGURATIONS RelWithDebInfo
-        OPTIONAL)
+    # Install PDB alongside DLL
+    install(FILES $<TARGET_PDB_FILE:fomod_plus_scanner>
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO}
+            CONFIGURATIONS RelWithDebInfo
+            OPTIONAL)
+endif()
 
 mo2_install_target(fomod_plus_scanner)
