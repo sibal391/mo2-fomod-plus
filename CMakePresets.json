@@ -2,6 +2,23 @@
   "version": 3,
   "configurePresets": [
     {
+      "name": "compat-v2.5.2",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-2.5.2",
+      "environment": {
+        "VCPKG_MANIFEST_MODE": "ON",
+        "VCPKG_FEATURE_FLAGS": "manifests,registries"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_MANIFEST_DIR": "${sourceDir}",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/mob/install/lib/cmake;${sourceDir}/mob/install/share;${sourceDir}/vcpkg_installed/x64-windows/share;$env{QT_ROOT_DIR};C:/Qt/6.7.3/msvc2019_64",
+        "Qt6_DIR": "$env{QT_ROOT_DIR}/lib/cmake/Qt6"
+      }
+    },
+    {
       "name": "default",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",

@@ -7,10 +7,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 $buildDir = switch ($Preset) {
-    "vs2022-windows"       { "vsbuild" }
-    "vs2022-windows-beta"  { "vsbuild-beta" }
+    "compat-v2.5.2" { "build-2.5.2" }
+    "vs2022-windows" { "vsbuild" }
+    "vs2022-windows-beta" { "vsbuild-beta" }
     "vs2022-windows-vcpkg" { "vsbuild-vcpkg" }
-    default                { "vsbuild" }
+    default { "vsbuild" }
 }
 
 # Resolve MO2 plugin dir from preset to find translations dir
@@ -41,7 +42,8 @@ if ($translationsDir -and (Test-Path $translationsDir)) {
         Write-Host "  Copied $($qm.Name) -> translations/" -ForegroundColor DarkGray
     }
     Write-Host "Translations copied to $translationsDir" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "Skipping translations (no MO2 translations dir found)" -ForegroundColor Yellow
 }
 
