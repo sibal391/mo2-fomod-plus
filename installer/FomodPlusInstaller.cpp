@@ -16,8 +16,11 @@
 #include "ui/Colors.h"
 #include "ui/FomodViewModel.h"
 
+#include <QCoreApplication>
+#include <QLocale>
 #include <QMessageBox>
 #include <QSettings>
+#include <QTranslator>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -32,6 +35,18 @@ bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     CrashHandler::initialize();
     mOrganizer    = organizer;
+
+    // Load plugin translations (.qm) for the current system locale
+    const QString translationsDir = QCoreApplication::applicationDirPath() + "/translations";
+    const QString langCode        = QLocale::system().name();
+    auto* translator              = new QTranslator(QCoreApplication::instance());
+    if (translator->load("fomod_plus_installer_" + langCode, translationsDir)
+        || translator->load("fomod_plus_installer_" + langCode.section('_', 0, 0), translationsDir)) {
+        QCoreApplication::installTranslator(translator);
+    } else {
+        delete translator;
+    }
+
     mFomodContent = make_shared<FomodDataContent>(organizer);
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     std::cout << "QDir::currentPath(): " << QDir::currentPath().toStdString() << std::endl;

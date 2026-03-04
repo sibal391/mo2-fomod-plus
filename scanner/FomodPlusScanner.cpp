@@ -11,7 +11,9 @@
 #include <archive.h>
 
 #include <QLabel>
+#include <QLocale>
 #include <QMovie>
+#include <QTranslator>
 #include <iostream>
 
 #include "stringutil.h"
@@ -21,6 +23,17 @@ using ScanCallbackFn = std::function<bool(IModInterface*, ScanResult result)>;
 bool FomodPlusScanner::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
+
+    // Load plugin translations (.qm) for the current system locale
+    const QString translationsDir = QCoreApplication::applicationDirPath() + "/translations";
+    const QString langCode        = QLocale::system().name();
+    auto* translator              = new QTranslator(QCoreApplication::instance());
+    if (translator->load("fomod_plus_scanner_" + langCode, translationsDir)
+        || translator->load("fomod_plus_scanner_" + langCode.section('_', 0, 0), translationsDir)) {
+        QCoreApplication::installTranslator(translator);
+    } else {
+        delete translator;
+    }
 
     mDialog = new QDialog();
     mDialog->setWindowTitle(tr("FOMOD Scanner"));

@@ -51,3 +51,13 @@ if(MSVC)
 endif()
 
 mo2_install_target(fomod_plus_scanner)
+
+# Korean translation (.ts -> .qm)
+set(_ko_ts "${CMAKE_CURRENT_SOURCE_DIR}/fomod_plus_scanner_ko.ts")
+set(_ko_qm "${CMAKE_CURRENT_BINARY_DIR}/fomod_plus_scanner_ko.qm")
+add_custom_command(OUTPUT ${_ko_qm}
+    COMMAND ${QT_ROOT}/bin/lrelease ${_ko_ts} -qm ${_ko_qm}
+    DEPENDS ${_ko_ts} VERBATIM)
+add_custom_target(fomod_plus_scanner_lrelease_ko DEPENDS ${_ko_qm})
+add_dependencies(fomod_plus_scanner fomod_plus_scanner_lrelease_ko)
+install(FILES ${_ko_qm} DESTINATION bin/translations)
