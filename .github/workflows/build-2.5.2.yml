@@ -2,7 +2,7 @@ name: Build Plugin (MO2 2.5.2 Compat)
 
 on:
   push:
-    branches: [ "mo2-2.5.2-compat" ]
+    branches: [ "mo2-2.5.2-compat", "feature/korean-l10n" ]
   pull_request:
     branches: [ "mo2-2.5.2-compat" ]
   workflow_dispatch:

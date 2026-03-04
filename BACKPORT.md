@@ -40,9 +40,14 @@ pull the **incompatible current master** for these repos.
 | `build.ps1` | Build directory mapping for compat preset |
 | `vcpkg.json` | Remove mo2-uibase/archive (built via mob) |
 | `CMakeLists.txt` | Auto-discover DEPENDENCIES_DIR, Qt6 linking, patchfinder disabled |
-| `installer/CMakeLists.txt` | Explicit Qt6 linking, PDB MSVC guard |
-| `scanner/CMakeLists.txt` | Explicit Qt6 linking, PDB MSVC guard |
+| `installer/CMakeLists.txt` | Explicit Qt6 linking, PDB MSVC guard, Korean lrelease target |
+| `scanner/CMakeLists.txt` | Explicit Qt6 linking, PDB MSVC guard, Korean lrelease target |
 | `patchfinder/CMakeLists.txt` | uibase include dirs, Qt6 linking |
+| `installer/FomodPlusInstaller.cpp` | QTranslator loading in init() for l10n |
+| `installer/FomodPlusInstaller.h` | localizedName() override, description() tr() wrap |
+| `scanner/FomodPlusScanner.cpp` | QTranslator loading in init() for l10n |
+| `installer/fomod_plus_installer_ko.ts` | Korean translation source (NEW) |
+| `scanner/fomod_plus_scanner_ko.ts` | Korean translation source (NEW) |
 | `.github/workflows/build-2.5.2.yml` | Full CI workflow (NEW) |
 | `.github/workflows/build.yml` | PR trigger restricted to main |
 | `mob.ini.2.5.2` | mob config with core tasks disabled (NEW) |
@@ -76,8 +81,14 @@ git push origin mo2-2.5.2-compat
 - **`installer/` and `scanner/` CMakeLists**: Keep the explicit `Qt6::Core
   Qt6::Gui Qt6::Widgets` in `target_link_libraries` and the `if(MSVC)` PDB
   guard.
-- **Source files** (`.cpp`, `.h`): Always accept upstream — we never modify
-  these.
+- **Source files** (`.cpp`, `.h`): Accept upstream for everything EXCEPT
+  the QTranslator loading blocks in `FomodPlusInstaller::init()` and
+  `FomodPlusScanner::init()`. These are clearly marked with comments
+  (`// Load plugin translations`). Also keep the `localizedName()` override
+  and `tr()` wrap on `description()` in `FomodPlusInstaller.h`.
+- **`.ts` files**: Upstream will never have Korean `.ts` files, so these
+  will not conflict. If upstream adds new `tr()` strings, update the
+  Korean `.ts` files to include translations for them.
 
 ## Troubleshooting
 
