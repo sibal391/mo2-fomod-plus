@@ -3,8 +3,8 @@
 This branch (`mo2-2.5.2-compat`) builds the **latest fomod-plus** against
 MO2 v2.5.2's `uibase.dll` so the plugin can run on MO2 2.5.2 installations.
 
-No source code (`.cpp`, `.h`) is modified — **only build configuration files
-are changed**.
+Build configuration files are changed for v2.5.2 compatibility, and source
+files are minimally modified for **Korean localization** (QTranslator loading).
 
 ## Architecture
 

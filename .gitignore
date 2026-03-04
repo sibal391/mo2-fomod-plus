@@ -16,3 +16,5 @@ docs/
 tests/build
 build/
 compile_commands.json
+LOG/
+mob/
