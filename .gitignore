@@ -19,3 +19,5 @@ build-*/
 dist/
 CMakeUserPresets.json
 compile_commands.json
+LOG/
+mob/

@@ -69,6 +69,20 @@
         "mo2-archive_DIR": "$env{MO2_DEPS_INSTALL}/lib/cmake/mo2-archive",
         "MO2_PLUGIN_TARGET_DIR": "${sourceDir}/dist/plugins"
       }
+    },
+    {
+      "name": "mo2-2.5.2",
+      "displayName": "MO2 2.5.2 (Standalone Synthetic SDK, Qt 6.7.1)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-mo2-2.5.2",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/build-mo2-2.5.2-sdk;$env{QT_ROOT};C:/Qt/6.7.1/msvc2019_64",
+        "mo2-cmake_DIR": "${sourceDir}/build-mo2-2.5.2-sdk/lib/cmake/mo2-cmake",
+        "mo2-uibase_DIR": "${sourceDir}/build-mo2-2.5.2-sdk/lib/cmake/mo2-uibase",
+        "mo2-archive_DIR": "${sourceDir}/build-mo2-2.5.2-sdk/lib/cmake/mo2-archive",
+        "MO2_PLUGIN_TARGET_DIR": "${sourceDir}/dist/plugins"
+      }
     }
   ]
 }
