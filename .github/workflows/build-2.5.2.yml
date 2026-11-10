@@ -1,0 +1,78 @@
+name: Build Plugin (MO2 2.5.2)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+env:
+  QT_VERSION: "6.7.1"
+  QT_ARCH: "win64_msvc2019_64"
+  QT_DIR: "msvc2019_64"
+
+permissions:
+  contents: write
+
+jobs:
+  build-mo2-252:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC x64 environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Cache Qt ${{ env.QT_VERSION }}
+        id: qt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}
+          key: qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
+
+      - name: Install Qt ${{ env.QT_VERSION }}
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade aqtinstall
+          python -m aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.QT_ARCH }} --outputdir "${{ github.workspace }}/Qt"
+
+      - name: Bootstrap MO2 v2.5.2 SDK, build, and package
+        shell: pwsh
+        env:
+          QT_ROOT: ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_DIR }}
+        run: |
+          pwsh -NoProfile -File cmake/BootstrapMO2v252SDK.ps1
+          pwsh -NoProfile -File package.ps1 -Preset mo2-2.5.2
+
+      - name: Run C++ test suite
+        shell: pwsh
+        env:
+          PATH: "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/${{ env.QT_DIR }}/bin;${{ env.PATH }}"
+        run: |
+          cmake --build build-mo2-2.5.2 --target runTests
+          ctest --test-dir build-mo2-2.5.2 --output-on-failure
+
+      - name: Upload MO2 2.5.2 package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mo2-fomod-plus-v2.5.2-ko
+          path: |
+            ${{ github.workspace }}/package
+            ${{ github.workspace }}/mo2-fomod-plus.7z
+
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $asset = "mo2-fomod-plus-${{ github.event.release.tag_name }}-mo2-2.5.2-ko.7z"
+          Copy-Item -LiteralPath mo2-fomod-plus.7z -Destination $asset -Force
+          gh release upload "${{ github.event.release.tag_name }}" $asset --clobber --repo ${{ github.repository }}
