@@ -63,11 +63,11 @@ class ArchiveExtractor {
         QString moduleConfigInArchive;
 
         for (auto* fileData : fileList) {
-            const auto entryPath = QString::fromStdWString(fileData->getArchiveFilePath());
+            const auto rawPath   = fileData->getArchiveFilePath();
+            const auto entryPath = QString::fromStdWString(rawPath);
 
             // Check for ModuleConfig.xml
-            if (entryPath.toLower().endsWith("fomod/moduleconfig.xml")
-                || entryPath.toLower().endsWith("fomod\\moduleconfig.xml")) {
+            if (endsWithArchivePathCaseInsensitive(rawPath, std::wstring(StringConstants::FomodFiles::W_MODULE_CONFIG))) {
                 moduleConfigInArchive = entryPath;
                 // Set output path relative to output directory for extract()
                 fileData->addOutputFilePath(L"ModuleConfig.xml");
@@ -145,9 +145,8 @@ class ArchiveExtractor {
         }
 
         for (const auto* fileData : archive->getFileList()) {
-            const auto path = QString::fromStdWString(fileData->getArchiveFilePath());
-            if (path.toLower().endsWith("fomod/moduleconfig.xml")
-                || path.toLower().endsWith("fomod\\moduleconfig.xml")) {
+            if (endsWithArchivePathCaseInsensitive(
+                    fileData->getArchiveFilePath(), std::wstring(StringConstants::FomodFiles::W_MODULE_CONFIG))) {
                 return true;
             }
         }

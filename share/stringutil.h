@@ -98,6 +98,26 @@ inline bool endsWithCaseInsensitive(const std::wstring& str, const std::wstring&
     return false;
 }
 
+inline std::wstring normalizeArchivePathSeparators(std::wstring path)
+{
+    std::ranges::replace(path, L'\\', L'/');
+    return path;
+}
+
+inline bool endsWithArchivePathCaseInsensitive(const std::wstring& archivePath, const std::wstring& suffix)
+{
+    const std::wstring normalizedPath   = toLower(normalizeArchivePathSeparators(archivePath));
+    const std::wstring normalizedSuffix = toLower(normalizeArchivePathSeparators(suffix));
+    if (normalizedPath.length() < normalizedSuffix.length()) {
+        return false;
+    }
+    const size_t offset = normalizedPath.length() - normalizedSuffix.length();
+    if (normalizedPath.compare(offset, normalizedSuffix.length(), normalizedSuffix) != 0) {
+        return false;
+    }
+    return offset == 0 || normalizedPath[offset - 1] == L'/';
+}
+
 inline QString formatPluginDescription(const QString& text)
 {
     std::string formattedText = text.toStdString();

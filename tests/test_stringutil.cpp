@@ -94,3 +94,20 @@ TEST(StringUtilTests, FormatPluginDescription_UrlWithIP)
     QString result   = formatPluginDescription(input);
     EXPECT_EQ(result, expected);
 }
+
+TEST(StringUtilTests, EndsWithArchivePathCaseInsensitive_MatchesBothSeparators)
+{
+    const std::wstring moduleConfigSuffix(StringConstants::FomodFiles::W_MODULE_CONFIG);
+    const std::wstring infoXmlSuffix(StringConstants::FomodFiles::W_INFO_XML);
+
+    EXPECT_TRUE(endsWithArchivePathCaseInsensitive(L"fomod/ModuleConfig.xml", moduleConfigSuffix));
+    EXPECT_TRUE(endsWithArchivePathCaseInsensitive(L"fomod\\ModuleConfig.xml", moduleConfigSuffix));
+    EXPECT_TRUE(endsWithArchivePathCaseInsensitive(L"MyMod\\FOMOD\\moduleconfig.xml", moduleConfigSuffix));
+    EXPECT_TRUE(endsWithArchivePathCaseInsensitive(L"MyMod/FOMOD/Info.XML", infoXmlSuffix));
+    EXPECT_TRUE(endsWithArchivePathCaseInsensitive(L"MyMod\\fomod\\info.xml", infoXmlSuffix));
+
+    // Must not falsely match partial directory names such as "notfomod\ModuleConfig.xml"
+    EXPECT_FALSE(endsWithArchivePathCaseInsensitive(L"notfomod\\ModuleConfig.xml", moduleConfigSuffix));
+    EXPECT_FALSE(endsWithArchivePathCaseInsensitive(L"notfomod/ModuleConfig.xml", moduleConfigSuffix));
+    EXPECT_FALSE(endsWithArchivePathCaseInsensitive(L"ModuleConfig.xml", moduleConfigSuffix));
+}
