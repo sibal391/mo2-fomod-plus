@@ -14,6 +14,7 @@
 #include <QMovie>
 #include <iostream>
 
+#include "PluginTranslations.h"
 #include "stringutil.h"
 
 using ScanCallbackFn = std::function<bool(IModInterface*, ScanResult result)>;
@@ -21,22 +22,16 @@ using ScanCallbackFn = std::function<bool(IModInterface*, ScanResult result)>;
 bool FomodPlusScanner::init(IOrganizer* organizer)
 {
     mOrganizer = organizer;
+    PluginTranslations::installPluginTranslator(organizer, "fomod_plus_scanner", "FomodPlusScanner", "Cancel");
 
     mDialog = new QDialog();
-    mDialog->setWindowTitle(tr("FOMOD Scanner"));
 
     const auto layout = new QVBoxLayout(mDialog);
 
-    const QString description
-        = tr("Greetings, traveler.\n"
-             "This tool will scan your load order for mods installed via FOMOD.\n"
-             "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
-             "Safe travels, and may your load order be free of conflicts.");
-
-    const auto descriptionLabel = new QLabel(description, mDialog);
-    descriptionLabel->setWordWrap(true); // Enable word wrap for large text
-    descriptionLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    descriptionLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop); // Align text to the top-left corner
+    mDescriptionLabel = new QLabel(mDialog);
+    mDescriptionLabel->setWordWrap(true); // Enable word wrap for large text
+    mDescriptionLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mDescriptionLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop); // Align text to the top-left corner
 
     const auto gifLabel = new QLabel(mDialog);
     const auto movie    = new QMovie(":/fomod/wizard");
@@ -47,24 +42,44 @@ bool FomodPlusScanner::init(IOrganizer* organizer)
     mProgressBar->setRange(0, 100); // Updated to actual mod count when scan starts
     mProgressBar->setVisible(false);
 
-    const auto scanButton   = new QPushButton(tr("Scan"), mDialog);
-    const auto cancelButton = new QPushButton(tr("Cancel"), mDialog);
+    mScanButton   = new QPushButton(mDialog);
+    mCancelButton = new QPushButton(mDialog);
+    retranslateUi();
 
-    layout->addWidget(descriptionLabel, 1);
+    layout->addWidget(mDescriptionLabel, 1);
     layout->addWidget(gifLabel, 1);
     layout->addWidget(mProgressBar, 1);
-    layout->addWidget(scanButton, 1);
-    layout->addWidget(cancelButton, 1);
+    layout->addWidget(mScanButton, 1);
+    layout->addWidget(mCancelButton, 1);
 
-    connect(cancelButton, &QPushButton::clicked, mDialog, &QDialog::reject);
-    connect(scanButton, &QPushButton::clicked, this, &FomodPlusScanner::onScanClicked);
+    connect(mCancelButton, &QPushButton::clicked, mDialog, &QDialog::reject);
+    connect(mScanButton, &QPushButton::clicked, this, &FomodPlusScanner::onScanClicked);
     connect(mDialog, &QDialog::finished, this, &FomodPlusScanner::cleanup);
 
     mDialog->setLayout(layout);
     mDialog->setMinimumSize(400, 300);
     mDialog->adjustSize();
-    descriptionLabel->adjustSize();
+    mDescriptionLabel->adjustSize();
     return true;
+}
+
+void FomodPlusScanner::retranslateUi() const
+{
+    if (mDialog != nullptr) {
+        mDialog->setWindowTitle(tr("FOMOD Scanner"));
+    }
+    if (mDescriptionLabel != nullptr) {
+        mDescriptionLabel->setText(tr("Greetings, traveler.\n"
+                                      "This tool will scan your load order for mods installed via FOMOD.\n"
+                                      "It will also fix up any erroneous FOMOD flags from previous versions of FOMOD Plus :) \n\n"
+                                      "Safe travels, and may your load order be free of conflicts."));
+    }
+    if (mScanButton != nullptr) {
+        mScanButton->setText(tr("Scan"));
+    }
+    if (mCancelButton != nullptr) {
+        mCancelButton->setText(tr("Cancel"));
+    }
 }
 
 void FomodPlusScanner::onScanClicked() const
@@ -86,7 +101,11 @@ void FomodPlusScanner::cleanup() const
     mProgressBar->setVisible(false);
 }
 
-void FomodPlusScanner::display() const { mDialog->exec(); }
+void FomodPlusScanner::display() const
+{
+    retranslateUi();
+    mDialog->exec();
+}
 
 int FomodPlusScanner::scanLoadOrder(const ScanCallbackFn& callback) const
 {

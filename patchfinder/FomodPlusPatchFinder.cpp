@@ -1,4 +1,5 @@
 #include "FomodPlusPatchFinder.h"
+#include "PluginTranslations.h"
 
 #include <ifiletree.h>
 #include <imodinterface.h>
@@ -32,7 +33,8 @@ using namespace std;
 bool FomodPlusPatchFinder::init(IOrganizer* organizer)
 {
   mOrganizer = organizer;
-  mDialog    = new QDialog();
+  PluginTranslations::installPluginTranslator(organizer, "fomod_plus_patch_finder", "FomodPlusPatchFinder", "Cancel");
+  mDialog = new QDialog();
   mDialog->setWindowTitle(tr("Patch Finder"));
   mDialog->setMinimumSize(400, 200);
   log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus-patchfinder.log");
@@ -114,6 +116,7 @@ void FomodPlusPatchFinder::applyAction(PatchAction action) const
 
 void FomodPlusPatchFinder::rebuild() const
 {
+  mDialog->setWindowTitle(tr("Patch Finder"));
   // Clear any existing layout
   if (mDialog->layout() != nullptr) {
     const auto clearLayout = [](auto&& self, QLayout* layout) -> void {

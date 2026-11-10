@@ -7,7 +7,9 @@
 #include <iplugintool.h>
 
 #include <QDialog>
+#include <QLabel>
 #include <QProgressBar>
+#include <QPushButton>
 
 using namespace MOBase;
 
@@ -22,8 +24,11 @@ class FomodPlusScanner final : public IPluginTool {
     ~FomodPlusScanner() override
     {
         delete mDialog;
-        mDialog      = nullptr;
-        mProgressBar = nullptr;
+        mDialog           = nullptr;
+        mProgressBar      = nullptr;
+        mDescriptionLabel = nullptr;
+        mScanButton       = nullptr;
+        mCancelButton     = nullptr;
     }
 
     bool init(IOrganizer* organizer) override;
@@ -33,6 +38,7 @@ class FomodPlusScanner final : public IPluginTool {
     void cleanup() const;
 
     [[nodiscard]] QString name() const override { return "FOMOD Scanner"; } // This should not be translated
+    [[nodiscard]] QString localizedName() const override { return tr("FOMOD Scanner"); }
     [[nodiscard]] QString author() const override { return "clearing"; }
     [[nodiscard]] QString description() const override { return tr("Scans modlist for files installed via FOMOD"); }
     [[nodiscard]] VersionInfo version() const override { return { 1, 0, 0, VersionInfo::RELEASE_FINAL }; }
@@ -56,8 +62,13 @@ class FomodPlusScanner final : public IPluginTool {
     static bool removeFomodInfoFromMod(IModInterface* mod, ScanResult);
 
   private:
+    void retranslateUi() const;
+
     QDialog* mDialog { nullptr };
     QProgressBar* mProgressBar { nullptr };
+    QLabel* mDescriptionLabel { nullptr };
+    QPushButton* mScanButton { nullptr };
+    QPushButton* mCancelButton { nullptr };
     IOrganizer* mOrganizer { nullptr };
 };
 

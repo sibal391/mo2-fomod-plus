@@ -10,6 +10,7 @@
 #include <xml/XmlParseException.h>
 
 #include "FomodInstallerWindow.h"
+#include "PluginTranslations.h"
 #include "integration/FomodDataContent.h"
 #include "lib/CrashHandler.h"
 #include "stringutil.h"
@@ -31,7 +32,8 @@ using namespace Qt::Literals::StringLiterals;
 bool FomodPlusInstaller::init(IOrganizer* organizer)
 {
     CrashHandler::initialize();
-    mOrganizer    = organizer;
+    mOrganizer = organizer;
+    PluginTranslations::installPluginTranslator(organizer, "fomod_plus_installer", "FomodInstallerWindow", "Cancel");
     mFomodContent = make_shared<FomodDataContent>(organizer);
     log.setLogFilePath(QDir::currentPath().toStdString() + "/logs/fomodplus.log");
     std::cout << "QDir::currentPath(): " << QDir::currentPath().toStdString() << std::endl;
@@ -129,13 +131,13 @@ std::vector<std::shared_ptr<const IPluginRequirement>> FomodPlusInstaller::requi
 
 QList<PluginSetting> FomodPlusInstaller::settings() const
 {
-    return { { u"fallback_to_legacy"_s, u"When hitting cancel, fall back to the legacy FOMOD installer."_s, false },
-        { u"always_restore_choices"_s, u"Restore previous choices without clicking the magic button"_s, true },
-        { u"show_images"_s, u"Show image previews and the image carousel in installer windows."_s, true },
-        { u"color_theme"_s, u"Select the color theme for the installer"_s, QString("Blue") }, // Default color name
-        { u"show_notifications"_s, u"Show the notifications panel"_s, false }, // WIP
-        { u"wizard_integration"_s, u"Integrate the installer with patch finder."_s, true }, // WIP
-        { u"show_fomod_filter"_s, u"Show the filter in the sidebar (may break other content filters)"_s, true } };
+    return { { u"fallback_to_legacy"_s, tr("When hitting cancel, fall back to the legacy FOMOD installer."), false },
+        { u"always_restore_choices"_s, tr("Restore previous choices without clicking the magic button"), true },
+        { u"show_images"_s, tr("Show image previews and the image carousel in installer windows."), true },
+        { u"color_theme"_s, tr("Select the color theme for the installer"), QString("Blue") }, // Default color name
+        { u"show_notifications"_s, tr("Show the notifications panel"), false }, // WIP
+        { u"wizard_integration"_s, tr("Integrate the installer with patch finder."), true }, // WIP
+        { u"show_fomod_filter"_s, tr("Show the filter in the sidebar (may break other content filters)"), true } };
 }
 
 #pragma endregion

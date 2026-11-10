@@ -72,25 +72,25 @@ bool ContextMenuEventFilter::eventFilter(QObject* obj, QEvent* event)
         const auto groupName = QString::fromStdString(mGroup->getName());
         const auto stepName = QString::fromStdString(mStep->getName());
 
-        menu.addAction("Copy Option Name", [pluginName]() {
+        menu.addAction(tr("Copy Option Name"), [pluginName]() {
             QApplication::clipboard()->setText(pluginName);
         });
 
-        menu.addAction("Copy Description", [description]() {
+        menu.addAction(tr("Copy Description"), [description]() {
             QApplication::clipboard()->setText(description);
         });
 
-        menu.addAction("Copy Group Name", [groupName]() {
+        menu.addAction(tr("Copy Group Name"), [groupName]() {
             QApplication::clipboard()->setText(groupName);
         });
 
-        menu.addAction("Copy Step Name", [stepName]() {
+        menu.addAction(tr("Copy Step Name"), [stepName]() {
             QApplication::clipboard()->setText(stepName);
         });
 
         if (!mNexusGameName.isEmpty()) {
             menu.addSeparator();
-            menu.addAction("Search on Nexus", [this, pluginName]() {
+            menu.addAction(tr("Search on Nexus"), [this, pluginName]() {
                 auto keyword = QString::fromUtf8(QUrl::toPercentEncoding(pluginName));
                 keyword.replace("%20", "+");
                 const auto url = QString("https://www.nexusmods.com/games/%1/mods?keyword=%2&sort=endorsements")
@@ -124,7 +124,7 @@ QLabel* UIHelper::createHyperlink(const QString& url, QWidget* parent = nullptr)
         return createLabel(url, parent);
     }
     const auto label        = new QLabel(url, parent);
-    const QString hyperlink = QString("<a href=\"%1\">%2</a>").arg(url, "Link");
+    const QString hyperlink = QString("<a href=\"%1\">%2</a>").arg(url, QCoreApplication::translate("UIHelper", "Link"));
     label->setText(hyperlink);
     label->setOpenExternalLinks(true);
     label->setTextFormat(Qt::RichText);

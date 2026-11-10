@@ -22,7 +22,9 @@ class FomodPlusPatchFinder final : public IPluginTool {
 public:
   bool init(IOrganizer* organizer) override;
 
-  [[nodiscard]] QString name() const override { return tr("Patch Finder"); };
+  [[nodiscard]] QString name() const override { return "Patch Finder"; };
+
+  [[nodiscard]] QString localizedName() const override { return tr("Patch Finder"); };
 
   [[nodiscard]] QString author() const override { return "clearing"; };
 

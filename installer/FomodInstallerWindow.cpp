@@ -57,7 +57,7 @@ FomodInstallerWindow::FomodInstallerWindow(FomodPlusInstaller* installer, Guesse
         // Create a simple "Install" widget for legacy FOMODs
         auto* legacyWidget = new QWidget(this);
         auto* layout       = new QVBoxLayout(legacyWidget);
-        auto* label        = new QLabel("This mod will install all files automatically.", legacyWidget);
+        auto* label        = new QLabel(tr("This mod will install all files automatically."), legacyWidget);
         layout->addWidget(label);
         mInstallStepStack->addWidget(legacyWidget);
     } else {
@@ -79,7 +79,7 @@ FomodInstallerWindow::FomodInstallerWindow(FomodPlusInstaller* installer, Guesse
         }
     } else {
         // For empty FOMODs, set default description
-        mDescriptionBox->setText("This mod will install all files automatically.");
+        mDescriptionBox->setText(tr("This mod will install all files automatically."));
     }
 }
 
@@ -812,7 +812,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 {
     const auto stylesheet = getColorStyle(UiColors::ColorApplication::BACKGROUND);
 
-    const auto tooltip = "You previously selected this plugin when installing this mod.";
+    const auto tooltip = tr("You previously selected this plugin when installing this mod.");
 
     logMessage(INFO, "Styling previously selected choices with stylesheet " + stylesheet.toStdString(), true);
     applyFnFromJson("plugins", [stylesheet, tooltip](QAbstractButton* button) {
@@ -824,7 +824,7 @@ void FomodInstallerWindow::stylePreviouslySelectedOptions()
 void FomodInstallerWindow::stylePreviouslyDeselectedOptions()
 {
     const auto stylesheet = getColorStyle(UiColors::ColorApplication::BORDER);
-    const auto tooltip    = "You previously unchecked this plugin when installing this mod.";
+    const auto tooltip    = tr("You previously unchecked this plugin when installing this mod.");
     applyFnFromJson("deselected", [stylesheet, tooltip](QAbstractButton* button) {
         button->setStyleSheet(stylesheet);
         button->setToolTip(tooltip);

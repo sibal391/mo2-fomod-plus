@@ -5,6 +5,7 @@
 #include "stringutil.h"
 #include "xml/ModuleConfiguration.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QString>
 #include <functional>
@@ -80,11 +81,14 @@ class FomodRescan {
                 break;
             case ScanOutcome::MissingArchive:
                 result.missingArchives++;
-                result.failedMods.push_back(mod->name().toStdString() + " (missing archive)");
+                result.failedMods.push_back(
+                    QCoreApplication::translate("FomodRescan", "%1 (missing archive)").arg(mod->name()).toStdString());
                 break;
             case ScanOutcome::ParseError:
                 result.parseErrors++;
-                result.failedMods.push_back(mod->name().toStdString() + " (parse error: " + errorDetail + ")");
+                result.failedMods.push_back(QCoreApplication::translate("FomodRescan", "%1 (parse error: %2)")
+                        .arg(mod->name(), QString::fromStdString(errorDetail))
+                        .toStdString());
                 break;
             case ScanOutcome::NoOptions:
                 // Not a failure - FOMOD has no installSteps/options to track
